@@ -14,11 +14,11 @@ const router = express.Router();
 // GET all issues (with optional query params: ?studentId=xxx&lecturerId=xxx&status=pending)
 router.get("/", getIssues);
 
+// GET all issues for a specific student (before /:issueId)
+router.get("/student/:studentId", getStudentIssues);
+
 // GET issue by ID
 router.get("/:issueId", getIssueById);
-
-// GET all issues for a specific student
-router.get("/student/:studentId", getStudentIssues);
 
 // POST create new issue
 router.post("/", createIssue);

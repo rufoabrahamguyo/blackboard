@@ -3,7 +3,7 @@ import Lecturer from "../models/Lecturer.js";
 // GET all lecturers
 export const getLecturers = async (req, res) => {
   try {
-    const lecturers = await Lecturer.find();
+    const lecturers = await Lecturer.find().select("-password");
     res.json(lecturers);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -13,7 +13,7 @@ export const getLecturers = async (req, res) => {
 // GET lecturer by ID
 export const getLecturerById = async (req, res) => {
   try {
-    const lecturer = await Lecturer.findById(req.params.id);
+    const lecturer = await Lecturer.findById(req.params.id).select("-password");
     if (!lecturer) return res.status(404).json({ message: "Lecturer not found" });
     res.json(lecturer);
   } catch (error) {
@@ -26,7 +26,9 @@ export const createLecturer = async (req, res) => {
   try {
     const lecturer = new Lecturer(req.body);
     const saved = await lecturer.save();
-    res.status(201).json(saved);
+    const safe = saved.toObject();
+    delete safe.password;
+    res.status(201).json(safe);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

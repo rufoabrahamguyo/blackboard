@@ -3,7 +3,10 @@ import Student from "../models/Student.js";
 // GET all students
 export const getStudents = async (req, res) => {
   try {
-    const students = await Student.find().populate("selections.lecturer");
+    const students = await Student.find()
+      .select("-password")
+      .populate("selections.lecturer")
+      .populate("enrollments.course");
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -13,7 +16,10 @@ export const getStudents = async (req, res) => {
 // GET student by ID
 export const getStudentById = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id).populate("selections.lecturer");
+    const student = await Student.findById(req.params.id)
+      .select("-password")
+      .populate("selections.lecturer")
+      .populate("enrollments.course");
 
     if (!student) return res.status(404).json({ message: "Student not found" });
 
@@ -27,6 +33,10 @@ export const getStudentById = async (req, res) => {
 export const createStudent = async (req, res) => {
   const { firstName, lastName, age, schoolID, major, currentYear, email, password } = req.body;
 
+  if (!password) {
+    return res.status(400).json({ message: "Password is required" });
+  }
+
   try {
     const student = new Student({
       firstName,
@@ -37,7 +47,8 @@ export const createStudent = async (req, res) => {
       currentYear,
       email,
       password,
-      selections:[],
+      selections: [],
+      enrollments: [],
     });
 
     const savedStudent = await student.save();

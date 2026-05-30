@@ -1,5 +1,6 @@
 import Issue from "../models/Issue.js";
 import Student from "../models/Student.js";
+import Course from "../models/Course.js";
 
 // GET all issues (with optional filters)
 export const getIssues = async (req, res) => {
@@ -11,8 +12,11 @@ export const getIssues = async (req, res) => {
     if (lecturerId) filter.lecturer = lecturerId;
     if (status) filter.status = status;
     
+    if (req.query.courseId) filter.course = req.query.courseId;
+
     const issues = await Issue.find(filter)
       .populate('student', 'firstName lastName email schoolID')
+      .populate('course', 'title code')
       .populate('lecturer', 'name email course')
       .populate('resolvedBy', 'name email')
       .sort({ createdAt: -1 }); // Most recent first
@@ -26,7 +30,7 @@ export const getIssues = async (req, res) => {
 // GET issue by ID
 export const getIssueById = async (req, res) => {
   try {
-    const issue = await Issue.findById(req.params.id)
+    const issue = await Issue.findById(req.params.issueId)
       .populate('student', 'firstName lastName email schoolID')
       .populate('lecturer', 'name email course')
       .populate('resolvedBy', 'name email');
@@ -44,28 +48,47 @@ export const getIssueById = async (req, res) => {
 // POST create new issue (student submits)
 export const createIssue = async (req, res) => {
   try {
-    const { studentId, lecturerId, issueType, subject, description, priority, attachments } = req.body;
+    const { studentId, lecturerId, courseId, issueType, subject, description, priority, attachments } = req.body;
     
-    // Verify student exists and is registered under this lecturer
     const student = await Student.findById(studentId);
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    
-    // Check if student is registered under this lecturer
-    const isRegistered = student.selections.some(
-      sel => sel.lecturer.toString() === lecturerId
-    );
-    
-    if (!isRegistered) {
-      return res.status(400).json({ 
-        message: "You are not registered under this lecturer" 
-      });
+
+    let resolvedLecturerId = lecturerId;
+    let resolvedCourseId = courseId;
+
+    if (courseId) {
+      const course = await Course.findById(courseId);
+      if (!course) return res.status(404).json({ message: "Course not found" });
+      resolvedLecturerId = course.lecturer;
+      const isEnrolled = student.enrollments.some(
+        (e) => e.course.toString() === courseId && e.status === "active"
+      );
+      if (!isEnrolled) {
+        return res.status(400).json({ message: "You are not enrolled in this course" });
+      }
+    } else if (!lecturerId) {
+      return res.status(400).json({ message: "Provide courseId or lecturerId" });
+    } else {
+      const viaSelection = student.selections.some(
+        (sel) => sel.lecturer.toString() === lecturerId
+      );
+      const lecturerCourses = await Course.find({ lecturer: lecturerId });
+      const viaEnrollment = lecturerCourses.some((c) =>
+        student.enrollments.some(
+          (e) => e.course.toString() === c._id.toString() && e.status === "active"
+        )
+      );
+      if (!viaSelection && !viaEnrollment) {
+        return res.status(400).json({ message: "You are not registered under this lecturer" });
+      }
     }
     
     const issue = new Issue({
       student: studentId,
-      lecturer: lecturerId,
+      course: resolvedCourseId,
+      lecturer: resolvedLecturerId,
       issueType: issueType || 'missing_marks',
       subject,
       description,

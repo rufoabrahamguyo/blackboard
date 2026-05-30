@@ -1,0 +1,76 @@
+:root {
+  font-family: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1a1a1a;
+  background: #f0f1f3;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+  /* Blackboard-inspired palette */
+  --bb-black: #0b0b0b;
+  --bb-dark: #1a1a1a;
+  --bb-navy: #262626;
+  --bb-sidebar: #2d2d2d;
+  --bb-accent: #c56fd6;
+  --bb-blue: #0b5cab;
+  --bb-blue-hover: #094a8a;
+  --bb-blue-light: #e8f0fa;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #d5d7da;
+  --border-light: #e8eaed;
+  --muted: #5c6670;
+  --text-secondary: #3d454d;
+  --error: #b32d2e;
+  --error-bg: #fdecea;
+  --success: #1a6b3c;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--bb-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--bb-blue-hover);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: var(--error);
+}
+
+.center {
+  text-align: center;
+}

@@ -6,6 +6,10 @@ const issueSchema = new mongoose.Schema({
     ref: "Student", 
     required: true 
   },
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
+  },
   lecturer: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Lecturer", 
